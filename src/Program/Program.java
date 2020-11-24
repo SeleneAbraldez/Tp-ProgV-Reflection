@@ -11,9 +11,9 @@ public class Program {
 
 		//Consultas.guardar(p);
 		//Consultas.modificar(p);
-		//Consultas.eliminar(p);
-		//Consultas.obtenerPorId(c, id);
-		
+		//Consultas.eliminar(p);		
+		//Consultas.obtenerPorId(Persona.class, 9);
+		System.out.println(Consultas.obtenerPorId(Persona.class, 9));
 		
 	}
 	

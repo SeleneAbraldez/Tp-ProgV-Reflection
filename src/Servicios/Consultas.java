@@ -8,10 +8,14 @@ import java.util.ArrayList;
 import Anotaciones.Columna;
 import Anotaciones.Tabla;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 public class Consultas {
 
@@ -110,21 +114,45 @@ public class Consultas {
 	 * @return Object: objeto con datos
 	 */
 	public static Object obtenerPorId(Class c, Object id) {
-//		String consulta = "SELECT * FROM ";
-//		ArrayList<Field> atributos = UBean.obtenerAtributos(obj);
-//		String id = "";
-//
-//		consulta += obj.getClass().getAnnotation(Tabla.class).nombre() + " ";
-//
-//		for (Field attr : atributos) {
-//			if (attr.getAnnotation(Columna.class).nombre().equals(id)) {
-//				id = UBean.ejecutarGet(obj, attr.getName()).toString();
-//				break;
-//			}
-//		}
-//
-//		consulta += "WHERE id = " + id;
-		return null;
+		String consulta = "SELECT * FROM ";
+		Constructor constructor;
+		Object instancia = null; 
+
+		try {
+			constructor = c.getConstructor();
+			instancia = constructor.newInstance();
+
+			consulta += "" + (((Tabla) c.getAnnotation(Tabla.class)).nombre()) + "";
+			consulta += " WHERE id = " + id;
+
+			UConexion uCone = UConexion.getInstance();
+			Connection conn = uCone.establecerConexion();
+			PreparedStatement ps = conn.prepareStatement(consulta);
+			System.out.println(consulta);
+			ResultSet rs = ps.executeQuery();
+
+			ps.execute();
+
+			while (rs.next()) {
+				for (Field attr : UBean.obtenerAtributos(instancia)) {
+					if (attr.getType().getSimpleName().equals("String")) {
+						UBean.ejecutarSet(instancia, attr.getAnnotation(Columna.class).nombre(),
+								rs.getString(attr.getAnnotation(Columna.class).nombre()));
+					} else if (attr.getType().getSimpleName().equals("int")) {
+						UBean.ejecutarSet(instancia, attr.getAnnotation(Columna.class).nombre(),
+								rs.getInt(attr.getAnnotation(Columna.class).nombre()));
+					}
+				}
+			}
+
+			uCone.cerrarConexion();
+		} catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
+				| IllegalArgumentException | InvocationTargetException | SQLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+
+		return instancia;
 	}
 
 	// separe la conexion proque me parecia que estaba repitiendo demasiado el
