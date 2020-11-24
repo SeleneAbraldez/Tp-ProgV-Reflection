@@ -24,7 +24,8 @@ public class UConexion {
 	public Connection establecerConexion() {
 		//https://docs.osgi.org/javadoc/r4v43/core/org/osgi/framework/BundleContext.html#getProperty%28java.lang.String%29
 		ResourceBundle rs = ResourceBundle.getBundle("framework");
-
+		//https://stackoverflow.com/questions/17484764/java-lang-classnotfoundexception-com-mysql-jdbc-driver-in-eclipse
+		
 		try {
 			Class.forName(rs.getString("driver"));
 			this.conection = DriverManager.getConnection(rs.getString("locationBD"), rs.getString("user"),
